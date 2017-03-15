@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <Version>0.0.1</Version>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Copyright>The MIT License (MIT)</Copyright>
     <Description>AspNetCore ElasticSearch Identity Provider</Description>
     <Authors>Facundo Voncina</Authors>
