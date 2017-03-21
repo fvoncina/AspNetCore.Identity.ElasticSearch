@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.Elastic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore.Identity.ElasticSearch.Tests", "tests\AspNetCore.Identity.ElasticSearch.Tests\AspNetCore.Identity.ElasticSearch.Tests.csproj", "{F17FB92E-0359-4C90-9F9A-156310386680}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample", "Sample\Sample.csproj", "{0996AABF-7346-45E1-AFCD-8618FE3582DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F17FB92E-0359-4C90-9F9A-156310386680}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F17FB92E-0359-4C90-9F9A-156310386680}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F17FB92E-0359-4C90-9F9A-156310386680}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0996AABF-7346-45E1-AFCD-8618FE3582DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0996AABF-7346-45E1-AFCD-8618FE3582DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0996AABF-7346-45E1-AFCD-8618FE3582DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0996AABF-7346-45E1-AFCD-8618FE3582DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

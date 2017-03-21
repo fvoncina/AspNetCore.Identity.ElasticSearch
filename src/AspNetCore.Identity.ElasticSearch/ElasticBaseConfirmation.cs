@@ -5,13 +5,33 @@ using System.Text;
 
 namespace AspNetCore.Identity.ElasticSearch
 {
-    public abstract class ElasticBaseConfirmation
-    {
-        [Date]
-        public DateTime? ConfirmatedOn { get; set; }
+	public class ElasticConfirmation
+	{
 
-        [Boolean]
-        public bool Confirmed { get; set; }
+		public ElasticConfirmation() { }
 
-    }
+		public ElasticConfirmation(string value)
+		{
+			if (string.IsNullOrEmpty(value))
+			{
+				throw new ArgumentException(nameof(value));
+			}
+			Value = value;
+			Normalized = value.ToLowerInvariant();
+		}
+
+		[Date]
+		public DateTimeOffset? ConfirmedOn { get; set; }
+
+		[Boolean]
+		public bool Confirmed { get; set; }
+
+		[Keyword]
+		public string Normalized { get; set; }
+
+		[Text]
+		public string Value { get; set; }
+
+
+	}
 }
