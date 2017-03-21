@@ -2,8 +2,14 @@
   DOTNET_INSTALL_DIR: .\dotnetcli
   ASPNETCORE_ENVIRONMENT: AppVeyor
 
-install:
-  - cinst 7zip
+deploy:
+  provider: NuGet
+  server:                  # remove to push to NuGet.org
+  api_key:
+    secure: 27ed618d-1d4f-440b-a094-a99f2e34a14b
+  skip_symbols: false
+  #symbol_server:           # remove to push symbols to SymbolSource.org
+  artifact: /.*\.nupkg/
 
 build_script:
   # Download and install .NET Core SDK
