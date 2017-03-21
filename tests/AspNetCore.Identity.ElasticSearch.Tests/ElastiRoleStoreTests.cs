@@ -23,7 +23,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task Create_Test()
 		{
 
-			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var role = new ElasticRole
 			{
 				Id = "role1",
@@ -43,7 +43,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task Delete_Test()
 		{
 
-			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var role = new ElasticRole
 			{
 				Id = "role1",
@@ -66,7 +66,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindById_Test()
 		{
 
-			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var role1 = new ElasticRole
 			{
 				Id = "role1",
@@ -101,7 +101,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindByName_Test()
 		{
 
-			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticRoleStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var role1 = new ElasticRole
 			{
 				Id = "role1",

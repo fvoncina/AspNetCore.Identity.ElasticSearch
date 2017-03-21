@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Linq.Expressions;
 using System.Linq;
+using Microsoft.Extensions.Options;
 
 namespace AspNetCore.Identity.ElasticSearch
 {
@@ -31,8 +32,12 @@ namespace AspNetCore.Identity.ElasticSearch
 
 		#region ctor
 
-		public ElasticUserStore(IElasticClient nestClient, string index, int defaultQuerySize = 1000, int defaultShards = 1, int defaultReplicas = 0)
-			: base(nestClient, index, defaultQuerySize, defaultShards, defaultReplicas)
+		public ElasticUserStore(IElasticClient nestClient, IOptions<ElasticOptions> options) : base(nestClient, options)
+		{
+
+		}
+
+		public ElasticUserStore(IElasticClient nestClient, ElasticOptions options) : base(nestClient, options)
 		{
 
 		}
@@ -59,8 +64,9 @@ namespace AspNetCore.Identity.ElasticSearch
 				user.Id = Guid.NewGuid().ToString();
 			}
 
-			var esResult = await _nestClient.IndexAsync<TUser>(user, r => r
-				.Index(_index)
+			var esResult = await NestClient.IndexAsync<TUser>(user, r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -84,8 +90,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.DeleteAsync<TUser>(user, r => r
-				.Index(_index)
+			var esResult = await NestClient.DeleteAsync<TUser>(user, r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -109,14 +116,23 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.GetAsync<TUser>(userId, r => r.Index(_index), cancellationToken);
+			var esResult = await NestClient.GetAsync<TUser>(userId, r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
+				, cancellationToken
+			);
 
 			if (!esResult.IsValid)
 			{
 				throw new Exception($"ElasticSearch Error in {GetMethodName()}", esResult.OriginalException);
 			}
 
-			return esResult.Source;
+			if (esResult.Source != null && esResult.Source.Deleted)
+			{
+				return esResult.Source;
+			}
+
+			return null;
 
 		}
 
@@ -135,8 +151,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TUser>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<TUser>(r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Size(1)
 				.Query(q => q
 					.Nested(n => n
@@ -144,8 +161,9 @@ namespace AspNetCore.Identity.ElasticSearch
 						.Query(qq => qq
 							.Bool(b => b
 								.Must(
-									m => m.Term(_nestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.LoginProvider), loginProvider),
-									m => m.Term(_nestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.ProviderKey), providerKey)
+									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.LoginProvider), loginProvider),
+									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.ProviderKey), providerKey),
+									m => m.Term(t=>t.Deleted, false)
 								)
 							)
 						)
@@ -156,7 +174,7 @@ namespace AspNetCore.Identity.ElasticSearch
 			if (!esResult.IsValid)
 			{
 				throw new Exception($"ElasticSearch Error in {GetMethodName()}", esResult.OriginalException);
-			}
+			}			
 
 			return esResult.Documents.FirstOrDefault();
 
@@ -172,11 +190,17 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TUser>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<TUser>(r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Size(1)
 				.Query(q => q
-					.Term(t => t.Normalized, normalizedUserName.GenerateSlug())
+					.Bool(b => b
+						.Must(
+							m => m.Term(t => t.Normalized, normalizedUserName.GenerateSlug()),
+							m => m.Term(t => t.Deleted, false)
+						)
+					)
 				), cancellationToken
 			);
 
@@ -309,8 +333,9 @@ namespace AspNetCore.Identity.ElasticSearch
 				throw new ArgumentException(nameof(user));
 			}
 
-			var esResult = await _nestClient.IndexAsync(user, r => r
-				.Index(_index)
+			var esResult = await NestClient.IndexAsync(user, r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -455,17 +480,19 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TUser>(r => r
-				.Index(_index)
-				.Size(_defaultQuerySize)
+			var esResult = await NestClient.SearchAsync<TUser>(r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
+				.Size(Options.DefaultQuerySize)
 				.Query(q => q
 					.Nested(n => n
 						.Path(p => p.Claims)
 						.Query(qq => qq
 							.Bool(b => b
 								.Must(
-									m => m.Term(_nestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Type), claim.Type),
-									m => m.Term(_nestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Value), claim.Value)
+									m => m.Term(t => t.Deleted, false),
+									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Type), claim.Type),
+									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Value), claim.Value)
 								)
 							)
 						)
@@ -502,8 +529,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			if (!await IsInRoleAsync(user, roleName, cancellationToken))
 			{
-				var esResult = await _nestClient.IndexAsync(new ElasticUserRole(roleName.GenerateSlug(), user.Id), r => r
-					.Index(_index)
+				var esResult = await NestClient.IndexAsync(new ElasticUserRole(roleName.GenerateSlug(), user.Id), r => r
+					.Index(Options.Index)
+					.Type(Options.UserRolesType)
 					.Refresh(Elasticsearch.Net.Refresh.True)
 					, cancellationToken
 				);
@@ -528,9 +556,10 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.DeleteByQueryAsync<ElasticUserRole>(r => r
-				.Index(_index)
-				.Size(_defaultQuerySize)
+			var esResult = await NestClient.DeleteByQueryAsync<ElasticUserRole>(r => r
+				.Index(Options.Index)
+				.Type(Options.UserRolesType)
+				.Size(Options.DefaultQuerySize)
 				.Refresh(true)
 				.Query(q => q
 					.Bool(b => b
@@ -556,9 +585,10 @@ namespace AspNetCore.Identity.ElasticSearch
 				throw new ArgumentNullException(nameof(user));
 			}
 
-			var esResult = await _nestClient.SearchAsync<ElasticUserRole>(r => r
-				.Index(_index)
-				.Size(_defaultQuerySize)
+			var esResult = await NestClient.SearchAsync<ElasticUserRole>(r => r
+				.Index(Options.Index)
+				.Type(Options.UserRolesType)
+				.Size(Options.DefaultQuerySize)
 				.Query(q => q
 					.Term(t => t.UserId, user.Id)
 				)
@@ -579,8 +609,9 @@ namespace AspNetCore.Identity.ElasticSearch
 				throw new ArgumentNullException(nameof(roleName));
 			}
 
-			var esResult = await _nestClient.SearchAsync<ElasticUserRole>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<ElasticUserRole>(r => r
+				.Index(Options.Index)
+				.Type(Options.UserRolesType)
 				.Size(1)
 				.Query(q => q
 					.Bool(b => b
@@ -604,15 +635,16 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esUserIds = await _nestClient.SearchAsync<ElasticUserRole>(r => r
-				.Index(_index)
-				.Size(_defaultQuerySize)
+			var esUserIds = await NestClient.SearchAsync<ElasticUserRole>(r => r
+				.Index(Options.Index)
+				.Type(Options.UserRolesType)
+				.Size(Options.DefaultQuerySize)
 				.Query(q => q
 					.Term(t => t.NormalizedRoleName, roleName.GenerateSlug())
 				), cancellationToken
 			);
 
-			var esUsers = await _nestClient.GetManyAsync<TUser>(esUserIds.Documents.Select(x => x.Id), _index, null, cancellationToken);
+			var esUsers = await NestClient.GetManyAsync<TUser>(esUserIds.Documents.Select(x => x.Id), Options.Index, Options.UsersType, cancellationToken);
 
 			return esUsers.Select(x => x.Source).ToList();
 
@@ -784,11 +816,17 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TUser>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<TUser>(r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Size(1)
 				.Query(q => q
-					.Term(t => t.Email.Normalized, normalizedEmail.ToLowerInvariant())
+					.Bool(b => b
+						.Must(
+							m => m.Term(t => t.Email.Normalized, normalizedEmail.ToLowerInvariant()),
+							m => m.Term(t => t.Deleted, false)
+						)
+					)
 				), cancellationToken
 			);
 
@@ -894,7 +932,11 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.GetAsync<TUser>(userId, r => r.Index(_index), cancellationToken);
+			var esResult = await NestClient.GetAsync<TUser>(userId, r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
+				, cancellationToken
+			);
 
 			if (!esResult.IsValid)
 			{
@@ -910,8 +952,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TUser>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<TUser>(r => r
+				.Index(Options.Index)
+				.Type(Options.UsersType)
 				.Query(q => q
 					.Term(t => t.UserName, userName)
 				)

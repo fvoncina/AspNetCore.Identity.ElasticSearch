@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
 using Nest;
 using System;
 using System.Collections.Generic;
@@ -19,9 +20,13 @@ namespace AspNetCore.Identity.ElasticSearch
 
 		#region ctor
 
-		public ElasticRoleStore(IElasticClient nestClient, string index, int defaultQuerySize = 1000, int defaultShards = 1, int defaultReplicas = 0)
-			: base(nestClient, index, defaultQuerySize, defaultShards, defaultReplicas)
+		public ElasticRoleStore(IElasticClient nestClient, IOptions<ElasticOptions> options) : base(nestClient, options)
 		{
+
+		}
+
+		public ElasticRoleStore(IElasticClient nestClient, ElasticOptions options):base(nestClient, options)
+		{			
 
 		}
 
@@ -83,8 +88,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.IndexAsync<TRole>(role, r => r
-				.Index(_index)
+			var esResult = await NestClient.IndexAsync<TRole>(role, r => r
+				.Index(Options.Index)
+				.Type(Options.RolesType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -107,8 +113,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.IndexAsync<TRole>(role, r => r
-				.Index(_index)
+			var esResult = await NestClient.IndexAsync<TRole>(role, r => r
+				.Index(Options.Index)
+				.Type(Options.RolesType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -130,8 +137,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.DeleteAsync<TRole>(role, r => r
-				.Index(_index)
+			var esResult = await NestClient.DeleteAsync<TRole>(role, r => r
+				.Index(Options.Index)
+				.Type(Options.RolesType)
 				.Refresh(Elasticsearch.Net.Refresh.True)
 				, cancellationToken
 			);
@@ -193,7 +201,11 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.GetAsync<TRole>(roleId, r => r.Index(_index), cancellationToken);
+			var esResult = await NestClient.GetAsync<TRole>(roleId, r => r
+				.Index(Options.Index)
+				.Type(Options.RolesType)
+				, cancellationToken
+			);
 
 			if (!esResult.IsValid)
 			{
@@ -212,8 +224,9 @@ namespace AspNetCore.Identity.ElasticSearch
 
 			cancellationToken.ThrowIfCancellationRequested();
 
-			var esResult = await _nestClient.SearchAsync<TRole>(r => r
-				.Index(_index)
+			var esResult = await NestClient.SearchAsync<TRole>(r => r
+				.Index(Options.Index)
+				.Type(Options.RolesType)
 				.Size(1)
 				.Query(q => q
 					.Term(t => t.Normalized, normalizedRoleName.GenerateSlug())

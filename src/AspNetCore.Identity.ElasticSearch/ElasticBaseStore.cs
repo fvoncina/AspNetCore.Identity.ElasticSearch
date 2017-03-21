@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Linq.Expressions;
 using System.Linq;
+using Microsoft.Extensions.Options;
 
 namespace AspNetCore.Identity.ElasticSearch
 {
@@ -18,15 +19,14 @@ namespace AspNetCore.Identity.ElasticSearch
 		where TRole : ElasticRole
 	{
 
-		internal readonly string _index;
-		internal readonly IElasticClient _nestClient;
-		internal readonly int _defaultQuerySize;
-		internal readonly int _defaultShards;
-		internal readonly int _defaultReplicas;
-
 		#region ctor
 
-		public ElasticBaseStore(IElasticClient nestClient, string index, int defaultQuerySize = 1000, int defaultShards = 1, int defaultReplicas = 0)
+		public ElasticBaseStore(IElasticClient nestClient, IOptions<ElasticOptions> options) : this(nestClient, options.Value)
+		{
+
+		}
+
+		public ElasticBaseStore(IElasticClient nestClient, ElasticOptions options)
 		{
 
 			if (nestClient == null)
@@ -34,25 +34,34 @@ namespace AspNetCore.Identity.ElasticSearch
 				throw new ArgumentException(nameof(nestClient));
 			}
 
-			if (string.IsNullOrEmpty(index))
+			if (options == null)
 			{
-				throw new ArgumentException(nameof(index));
+				throw new ArgumentException(nameof(options));
 			}
 
-			if (defaultShards < 1)
+			if (string.IsNullOrEmpty(options.Index))
 			{
-				throw new ArgumentException("defaultShards must be at least 1", nameof(defaultShards));
+				throw new ArgumentException(nameof(options.Index));
 			}
 
-			_index = index;
+			if (string.IsNullOrEmpty(options.UsersType))
+			{
+				throw new ArgumentException(nameof(options.UsersType));
+			}
 
-			_nestClient = nestClient;
+			if (string.IsNullOrEmpty(options.RolesType))
+			{
+				throw new ArgumentException(nameof(options.RolesType));
+			}
 
-			_defaultQuerySize = defaultQuerySize;
+			if (string.IsNullOrEmpty(options.UserRolesType))
+			{
+				throw new ArgumentException(nameof(options.UserRolesType));
+			}
 
-			_defaultShards = defaultShards;
+			NestClient = nestClient;
 
-			_defaultReplicas = defaultReplicas;
+			Options = options;
 
 			EnsureInitialization();
 
@@ -60,31 +69,42 @@ namespace AspNetCore.Identity.ElasticSearch
 
 		#endregion
 
+		#region props
+		public ElasticOptions Options { get; set; }
+
+		public IElasticClient NestClient { get; set; }
+		#endregion
+
 		#region Private Helpers
 		internal void EnsureInitialization()
 		{
 
-			var createDescriptor = new CreateIndexDescriptor(_index)
-				.Settings(s => s
-					.NumberOfShards(_defaultShards)
-					.NumberOfReplicas(_defaultReplicas)
-				).Mappings(m => m
-					.Map<TUser>(mm => mm
-						.AutoMap()
-					)
-					.Map<TRole>(mm => mm
-						.AutoMap()
-					)
-					.Map<ElasticUserRole>(mm => mm
-						.AutoMap()
-					)
+			if (!NestClient.IndexExists(Options.Index).Exists)
+			{
+
+				var createDescriptor = new CreateIndexDescriptor(Options.Index)
+					.Settings(s => s
+						.NumberOfShards(Options.DefaultShards)
+						.NumberOfReplicas(Options.DefaultReplicas)
+					).Mappings(m => m
+						.Map<TUser>(Options.UsersType, mm => mm
+								.AutoMap()
+						)
+						.Map<TRole>(Options.RolesType, mm => mm
+							.AutoMap()
+						)
+						.Map<ElasticUserRole>(Options.UserRolesType, mm => mm
+							.AutoMap()
+						)
 				);
 
-			var createIndexResult = _nestClient.CreateIndex(createDescriptor);
+				var createIndexResult = NestClient.CreateIndex(createDescriptor);
 
-			if (!createIndexResult.IsValid)
-			{
-				throw new InvalidOperationException($"Error creating index {_index}. {createIndexResult.OriginalException.Message}", createIndexResult.OriginalException);
+				if (!createIndexResult.IsValid)
+				{
+					throw new InvalidOperationException($"Error creating index {Options.Index}. {createIndexResult.ServerError}");
+
+				}
 
 			}
 

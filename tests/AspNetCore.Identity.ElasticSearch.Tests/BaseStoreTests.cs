@@ -22,8 +22,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 			};
 			var esConnectionConfiguration = new ConnectionSettings(connectionPool);
 			esConnectionConfiguration.DisableDirectStreaming(true);
-			_nestClient = new ElasticClient(esConnectionConfiguration);
-			_nestClient.DeleteIndex(_index);			
+			_nestClient = new ElasticClient(esConnectionConfiguration);			
 		}
 
 		public void Dispose()

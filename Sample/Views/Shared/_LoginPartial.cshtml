@@ -1,8 +1,9 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Sample.Models
+@using AspNetCore.Identity.ElasticSearch
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ElasticUser> SignInManager
+@inject UserManager<ElasticUser> UserManager
 
 @if (SignInManager.IsSignedIn(User))
 {

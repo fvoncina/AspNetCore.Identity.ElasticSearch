@@ -10,22 +10,23 @@ using Microsoft.Extensions.Options;
 using Sample.Models;
 using Sample.Models.ManageViewModels;
 using Sample.Services;
+using AspNetCore.Identity.ElasticSearch;
 
 namespace Sample.Controllers
 {
     [Authorize]
     public class ManageController : Controller
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ElasticUser> _userManager;
+        private readonly SignInManager<ElasticUser> _signInManager;
         private readonly string _externalCookieScheme;
         private readonly IEmailSender _emailSender;
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
 
         public ManageController(
-          UserManager<ApplicationUser> userManager,
-          SignInManager<ApplicationUser> signInManager,
+          UserManager<ElasticUser> userManager,
+          SignInManager<ElasticUser> signInManager,
           IOptions<IdentityCookieOptions> identityCookieOptions,
           IEmailSender emailSender,
           ISmsSender smsSender,
@@ -363,7 +364,7 @@ namespace Sample.Controllers
             Error
         }
 
-        private Task<ApplicationUser> GetCurrentUserAsync()
+        private Task<ElasticUser> GetCurrentUserAsync()
         {
             return _userManager.GetUserAsync(HttpContext.User);
         }

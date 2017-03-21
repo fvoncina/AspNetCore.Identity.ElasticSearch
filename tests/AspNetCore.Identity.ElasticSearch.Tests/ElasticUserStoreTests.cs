@@ -23,7 +23,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task Create_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -42,7 +42,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task Delete_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -63,7 +63,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindById_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -90,7 +90,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindByLogin_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user1 = new ElasticUser
 			{
@@ -121,7 +121,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindByName_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -143,7 +143,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetLogins_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -166,7 +166,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetNormalizedUserName_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			const string expected = "test1";
 			var user = new ElasticUser
@@ -189,7 +189,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetUserId_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			const string expected = "1";
 			var user = new ElasticUser
@@ -213,7 +213,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetUserName_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			const string expected = "test1";
 			var user = new ElasticUser
@@ -237,7 +237,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task RemoveLogin_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var user = new ElasticUser
 			{
 				UserName = "test1",
@@ -262,7 +262,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task SetUserName_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 			var user = new ElasticUser
 			{
 				UserName = "test1",
@@ -287,7 +287,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task Update_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -317,7 +317,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task AddLogin_ShouldAdd_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -344,7 +344,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task AddLogin_ShouldNotAdd_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -371,7 +371,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetClaims_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -402,7 +402,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task AddClaims_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -439,7 +439,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task ReplaceClaim_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -470,7 +470,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task RemoveClaim_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -506,7 +506,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetUsersForClaim_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user1 = new ElasticUser
 			{
@@ -546,7 +546,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task AddToRole_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -576,7 +576,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task GetUsersInRole_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user1 = new ElasticUser
 			{
@@ -620,7 +620,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task SetSecurityStamp_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -647,7 +647,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task SetTwoFactorEnabled_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user = new ElasticUser
 			{
@@ -674,7 +674,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 		public async Task FindByEmail_Test()
 		{
 
-			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, _index);
+			var store = new ElasticUserStore<ElasticUser, ElasticRole>(_nestClient, new ElasticOptions { Index=_index});
 
 			var user1 = new ElasticUser
 			{
