@@ -14,8 +14,17 @@ namespace AspNetCore.Identity.ElasticSearch
 			where TUser : ElasticUser
 			where TRole : ElasticRole
 		{
-			services.AddSingleton(typeof(IUserStore<TUser>), typeof(ElasticUserStore<TUser, TRole>));
-			services.AddSingleton(typeof(IRoleStore<TUser>), typeof(ElasticRoleStore<TUser, TRole>));
+			services.AddSingleton(typeof(ElasticUserStore<TUser, TRole>), typeof(ElasticUserStore<TUser, TRole>));
+			services.AddSingleton(typeof(ElasticRoleStore<TUser, TRole>), typeof(ElasticRoleStore<TUser, TRole>));
+			services.AddSingleton(typeof(IUserStore<TUser>), sp=> {
+				return (IUserStore<TUser>)sp.GetRequiredService(typeof(ElasticUserStore<TUser, TRole>));
+			});
+			services.AddSingleton(typeof(IRoleStore<TUser>), sp=> {
+				return (IRoleStore<TUser>)sp.GetRequiredService(typeof(ElasticRoleStore<TUser, TRole>));
+			});
+			services.AddSingleton(typeof(IRoleClaimStore<TUser>), sp => {
+				return (IRoleClaimStore<TUser>)sp.GetRequiredService(typeof(ElasticRoleStore<TUser, TRole>));
+			});
 			return services;
 		}
 

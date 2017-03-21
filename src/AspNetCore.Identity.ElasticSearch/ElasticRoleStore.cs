@@ -13,6 +13,7 @@ namespace AspNetCore.Identity.ElasticSearch
 {
 	public class ElasticRoleStore<TUser, TRole> :
 		ElasticBaseStore<TUser, TRole>,
+		IRoleStore<TRole>,
 		IRoleClaimStore<TRole>
 		where TUser : ElasticUser
 		where TRole : ElasticRole

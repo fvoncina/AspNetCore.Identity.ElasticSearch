@@ -23,7 +23,7 @@ namespace AspNetCore.Identity.ElasticSearch.Tests
 					.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}.json", optional: true)
 					.AddEnvironmentVariables();
 			var configuration = builder.Build();
-			var elasticUri = new Uri(configuration["ElasticSearchIdentity:ElasticSearchUri"]);
+			var elasticUri = new Uri(configuration["ElasticSearchUri"]);
 
 			_index += $"_{Guid.NewGuid().ToString()}";
 			var connectionPool = new StaticConnectionPool(new[] { elasticUri })

@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AspNetCore.Identity.ElasticSearch.Tests": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

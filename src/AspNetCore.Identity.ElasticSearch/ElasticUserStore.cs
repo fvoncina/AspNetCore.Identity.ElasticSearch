@@ -64,6 +64,8 @@ namespace AspNetCore.Identity.ElasticSearch
 				user.Id = Guid.NewGuid().ToString();
 			}
 
+			user.Normalized = user.UserName.GenerateSlug();
+
 			var esResult = await NestClient.IndexAsync<TUser>(user, r => r
 				.Index(Options.Index)
 				.Type(Options.UsersType)
@@ -336,6 +338,8 @@ namespace AspNetCore.Identity.ElasticSearch
 			{
 				throw new ArgumentException(nameof(user));
 			}
+
+			user.Normalized = user.UserName.GenerateSlug();
 
 			var esResult = await NestClient.IndexAsync(user, r => r
 				.Index(Options.Index)

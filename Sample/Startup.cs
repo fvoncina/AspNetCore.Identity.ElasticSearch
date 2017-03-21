@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,8 +22,14 @@ namespace Sample
 {
 	public class Startup
 	{
+
+		private IHostingEnvironment _environment = null;
+
 		public Startup(IHostingEnvironment env)
 		{
+
+			_environment = env;
+
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(env.ContentRootPath)
 				.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -42,7 +46,7 @@ namespace Sample
 		}
 
 		public IConfigurationRoot Configuration { get; }
-		public object DataProtectionProvider { get; private set; }
+		
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
@@ -53,7 +57,8 @@ namespace Sample
 			// ES Registration
 			services.AddSingleton<IElasticClient>(sp =>
 			{
-				var esConnectionConfiguration = new ConnectionSettings(new StaticConnectionPool(new List<Uri> { sp.GetRequiredService<IOptions<ElasticOptions>>().Value.ElasticSearchUri })
+				var esUri = new Uri(Configuration["ElasticSearchUri"]);
+				var esConnectionConfiguration = new ConnectionSettings(new StaticConnectionPool(new List<Uri> { esUri })
 				{
 					SniffedOnStartup = false,
 				});
@@ -61,18 +66,12 @@ namespace Sample
 				esConnectionConfiguration.DisableDirectStreaming(true);
 				var nestClient = new ElasticClient(esConnectionConfiguration);
 				return nestClient;
-			});
-
-			services.AddSingleton<ElasticUserStore<ElasticUser,ElasticRole>>();
-			services.AddSingleton<ElasticRoleStore<ElasticUser, ElasticRole>>();
+			});			
 
 			services.AddElasticSearchIdentity<ElasticUser, ElasticRole>();
 
 			services.Configure<IdentityOptions>(options =>
 			{
-				//var dataProtectionPath = Path.Combine(_env.WebRootPath, "identity-artifacts");
-				//options.Cookies.ApplicationCookie.AuthenticationScheme = "ApplicationCookie";
-				//options.Cookies.ApplicationCookie.DataProtectionProvider = DataProtectionProvider.Create(dataProtectionPath);
 				options.Lockout.AllowedForNewUsers = true;
 			});
 
@@ -96,23 +95,6 @@ namespace Sample
 			services.TryAddSingleton<IUserClaimsPrincipalFactory<ElasticUser>, UserClaimsPrincipalFactory<ElasticUser>>();
 			services.TryAddSingleton<UserManager<ElasticUser>, UserManager<ElasticUser>>();
 			services.TryAddScoped<SignInManager<ElasticUser>, SignInManager<ElasticUser>>();
-
-
-			//services.AddSingleton<IUserStore<ElasticUser>>(sp =>
-			//{
-			//	return new ElasticStore<ElasticUser>(sp.GetRequiredService<IElasticClient>(), "sample-es-identity");
-			//});
-
-			//services.AddIdentity<ElasticUser, IdentityRole>()
-			//	.AddUserManager<ElasticStore<ElasticUser>>();				
-
-			// Add framework services.
-			//services.AddDbContext<ApplicationDbContext>(options =>
-			//	options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
-
-			//services.AddIdentity<ApplicationUser, IdentityRole>()
-			//	.AddEntityFrameworkStores<ApplicationDbContext>()
-			//	.AddDefaultTokenProviders();
 
 			services.AddMvc();
 
@@ -150,27 +132,9 @@ namespace Sample
 					name: "default",
 					template: "{controller=Home}/{action=Index}/{id?}");
 			});
+
 		}
-
-
-		private void AddDefaultTokenProviders(IServiceCollection services)
-		{
-			var dataProtectionProviderType = typeof(DataProtectorTokenProvider<>).MakeGenericType(typeof(ElasticUser));
-			var phoneNumberProviderType = typeof(PhoneNumberTokenProvider<>).MakeGenericType(typeof(ElasticUser));
-			var emailTokenProviderType = typeof(EmailTokenProvider<>).MakeGenericType(typeof(ElasticUser));
-			AddTokenProvider(services, TokenOptions.DefaultProvider, dataProtectionProviderType);
-			AddTokenProvider(services, TokenOptions.DefaultEmailProvider, emailTokenProviderType);
-			AddTokenProvider(services, TokenOptions.DefaultPhoneProvider, phoneNumberProviderType);
-		}
-
-		private void AddTokenProvider(IServiceCollection services, string providerName, Type provider)
-		{
-			services.Configure<IdentityOptions>(
-				options => { options.Tokens.ProviderMap[providerName] = new TokenProviderDescriptor(provider); });
-
-			services.AddSingleton(provider);
-		}
-
+			
 		public class UserClaimsPrincipalFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
 			where TUser : class
 		{

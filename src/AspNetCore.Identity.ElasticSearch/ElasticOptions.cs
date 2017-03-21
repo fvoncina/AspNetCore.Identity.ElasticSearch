@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 namespace AspNetCore.Identity.ElasticSearch
 {
 	public class ElasticOptions
-	{
-
-		public Uri ElasticSearchUri { get; set; }
+	{		
 
 		public string Index { get; set; } = "es-identity";
 
