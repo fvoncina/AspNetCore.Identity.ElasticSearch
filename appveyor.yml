@@ -9,7 +9,7 @@ deploy:
     secure: 27ed618d-1d4f-440b-a094-a99f2e34a14b
   skip_symbols: false
   #symbol_server:           # remove to push symbols to SymbolSource.org
-  artifact: '**\*.nupkg'
+  artifact: /.*\.nupkg/
 
 build_script:
   # Download and install .NET Core SDK
@@ -25,7 +25,7 @@ build_script:
   - ps: dotnet build .\sample -c Release
   - ps: dotnet build .\tests\AspNetCore.Identity.ElasticSearch.Tests -c Release
   - ps: dotnet test .\tests\AspNetCore.Identity.ElasticSearch.Tests\AspNetCore.Identity.ElasticSearch.Tests.csproj -c Release --no-build
-  - ps: dotnet pack .\src\AspNetCore.Identity.ElasticSearch -c Release
+  - ps: dotnet pack .\src\AspNetCore.Identity.ElasticSearch -c Release -o .\
 
 test: off
 version: '0.0.0.{build}'
