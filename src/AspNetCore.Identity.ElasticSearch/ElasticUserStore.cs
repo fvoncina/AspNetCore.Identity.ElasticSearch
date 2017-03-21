@@ -127,7 +127,7 @@ namespace AspNetCore.Identity.ElasticSearch
 				throw new Exception($"ElasticSearch Error in {GetMethodName()}", esResult.OriginalException);
 			}
 
-			if (esResult.Source != null && esResult.Source.Deleted)
+			if (esResult.Source != null && !esResult.Source.Deleted)
 			{
 				return esResult.Source;
 			}
@@ -156,16 +156,20 @@ namespace AspNetCore.Identity.ElasticSearch
 				.Type(Options.UsersType)
 				.Size(1)
 				.Query(q => q
-					.Nested(n => n
-						.Path(p => p.Logins)
-						.Query(qq => qq
-							.Bool(b => b
-								.Must(
-									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.LoginProvider), loginProvider),
-									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.ProviderKey), providerKey),
-									m => m.Term(t=>t.Deleted, false)
-								)
-							)
+					.Bool(b => b
+						.Must(
+							m => m.Nested(n => n
+								  .Path(p => p.Logins)
+								  .Query(qq => qq
+									  .Bool(bb => bb
+										  .Must(
+											  mm => mm.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.LoginProvider), loginProvider),
+											  mm => mm.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticUserLogin>(x => x.Logins, x => x.ProviderKey), providerKey)
+										  )
+									  )
+								  )
+							),
+							m => m.Term(t => t.Deleted, false)
 						)
 					)
 				), cancellationToken
@@ -174,7 +178,7 @@ namespace AspNetCore.Identity.ElasticSearch
 			if (!esResult.IsValid)
 			{
 				throw new Exception($"ElasticSearch Error in {GetMethodName()}", esResult.OriginalException);
-			}			
+			}
 
 			return esResult.Documents.FirstOrDefault();
 
@@ -485,19 +489,21 @@ namespace AspNetCore.Identity.ElasticSearch
 				.Type(Options.UsersType)
 				.Size(Options.DefaultQuerySize)
 				.Query(q => q
-					.Nested(n => n
-						.Path(p => p.Claims)
-						.Query(qq => qq
-							.Bool(b => b
-								.Must(
-									m => m.Term(t => t.Deleted, false),
-									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Type), claim.Type),
-									m => m.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Value), claim.Value)
-								)
-							)
+					.Bool(b => b
+						.Must(
+							m => m.Nested(n => n
+								  .Path(p => p.Claims)
+								  .Query(qq => qq
+									  .Bool(bb => bb
+										  .Must(
+											  mm => mm.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Type), claim.Type),
+											  mm => mm.Term(NestClient.Infer.NestedProperty<ElasticUser, ElasticClaim>(x => x.Claims, x => x.Value), claim.Value)
+										  )
+									  )
+								  )
+							),
+							m => m.Term(t => t.Deleted, false)
 						)
-
-
 					)
 				), cancellationToken
 			);

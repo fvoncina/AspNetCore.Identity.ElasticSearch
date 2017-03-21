@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net451;netstandard1.3</TargetFrameworks>
-    <!--<TargetFramework>netcoreapp1.1</TargetFramework>-->
+    <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>    
     <Version>0.0.1</Version>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Copyright>The MIT License (MIT)</Copyright>

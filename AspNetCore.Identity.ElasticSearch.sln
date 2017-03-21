@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".root", ".root", "{B049D598
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".scripts", ".scripts", "{5E5793C3-E7B0-41EC-A311-B22D48750661}"
 	ProjectSection(SolutionItems) = preProject
+		scripts\local_db.ps1 = scripts\local_db.ps1
 		scripts\patch-version.sh = scripts\patch-version.sh
 		scripts\push-to-nuget.sh = scripts\push-to-nuget.sh
 		scripts\set-build-version.sh = scripts\set-build-version.sh
