@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>net451;netstandard1.6</TargetFrameworks>    
-    <Version>0.0.3</Version>
+    <Version>0.0.4</Version>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <Copyright>The MIT License (MIT)</Copyright>
     <Description>AspNetCore ElasticSearch Identity Provider</Description>
