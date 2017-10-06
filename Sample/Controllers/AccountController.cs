@@ -24,19 +24,16 @@ namespace Sample.Controllers
 		private readonly IEmailSender _emailSender;
 		private readonly ISmsSender _smsSender;
 		private readonly ILogger _logger;
-		//private readonly string _externalCookieScheme;
-
+		
 		public AccountController(
 			UserManager<ElasticUser> userManager,
 			SignInManager<ElasticUser> signInManager,
-			//IOptions<IdentityCookieOptions> identityCookieOptions,
 			IEmailSender emailSender,
 			ISmsSender smsSender,
 			ILoggerFactory loggerFactory)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
-			//_externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
 			_emailSender = emailSender;
 			_smsSender = smsSender;
 			_logger = loggerFactory.CreateLogger<AccountController>();
@@ -48,9 +45,6 @@ namespace Sample.Controllers
 		[AllowAnonymous]
 		public async Task<IActionResult> Login(string returnUrl = null)
 		{
-			// Clear the existing external cookie to ensure a clean login process
-			//await HttpContext.Authentication.SignOutAsync(_externalCookieScheme);
-
 			ViewData["ReturnUrl"] = returnUrl;
 			return View();
 		}
