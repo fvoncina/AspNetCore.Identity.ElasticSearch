@@ -1,4 +1,4 @@
-﻿@using System.Collections.Generic
+@using System.Collections.Generic
 @using Microsoft.AspNetCore.Http
 @using Microsoft.AspNetCore.Http.Authentication
 @using AspNetCore.Identity.ElasticSearch
@@ -59,7 +59,7 @@
         <section>
             <h4>Use another service to log in.</h4>
             <hr />
-            @{
+            @*@{
                 var loginProviders = SignInManager.GetExternalAuthenticationSchemes().ToList();
                 if (loginProviders.Count == 0)
                 {
@@ -83,7 +83,7 @@
                         </div>
                     </form>
                 }
-            }
+            }*@
         </section>
     </div>
 </div>

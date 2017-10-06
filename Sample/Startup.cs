@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Identity;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Sample
 {
@@ -68,33 +69,47 @@ namespace Sample
 				return nestClient;
 			});			
 
-			services.AddElasticSearchIdentity<ElasticUser, ElasticRole>();
+			
+
+			services.AddIdentity<ElasticUser, ElasticRole>()
+				.AddElasticsearchIdentity()
+				.AddDefaultTokenProviders();
 
 			services.Configure<IdentityOptions>(options =>
 			{
 				options.Lockout.AllowedForNewUsers = true;
 			});
 
+			services.ConfigureApplicationCookie(options => options.LoginPath = "/Account/Login");
+
+			services.AddAuthentication(IdentityConstants.ApplicationScheme)
+				.AddCookie(options => {
+					options.LoginPath = "/Account/LogIn";
+					options.LogoutPath = "/Account/LogOff";
+				});
+
 			// Services used by identity
-			services.AddAuthentication(options =>
-			{
-				// This is the Default value for ExternalCookieAuthenticationScheme
-				options.SignInScheme = new IdentityCookieOptions().ExternalCookieAuthenticationScheme;
-			});
+			//services.AddAuthentication(options =>
+			//{
+			//	// This is the Default value for ExternalCookieAuthenticationScheme
+			//	options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+			//	options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+			//	options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+			//});
 
 			services.AddOptions();
 			services.AddDataProtection();
 
-			services.TryAddSingleton<IdentityMarkerService>();
-			services.TryAddSingleton<IUserValidator<ElasticUser>, UserValidator<ElasticUser>>();
-			services.TryAddSingleton<IPasswordValidator<ElasticUser>, PasswordValidator<ElasticUser>>();
+			//services.TryAddSingleton<IdentityMarkerService>();
+			//services.TryAddSingleton<IUserValidator<ElasticUser>, UserValidator<ElasticUser>>();
+			//services.TryAddSingleton<IPasswordValidator<ElasticUser>, PasswordValidator<ElasticUser>>();
 			services.TryAddSingleton<IPasswordHasher<ElasticUser>, PasswordHasher<ElasticUser>>();
 			services.TryAddSingleton<ILookupNormalizer, UpperInvariantLookupNormalizer>();
-			services.TryAddSingleton<IdentityErrorDescriber>();
+			//services.TryAddSingleton<IdentityErrorDescriber>();
 			services.TryAddSingleton<ISecurityStampValidator, SecurityStampValidator<ElasticUser>>();
-			services.TryAddSingleton<IUserClaimsPrincipalFactory<ElasticUser>, UserClaimsPrincipalFactory<ElasticUser>>();
-			services.TryAddSingleton<UserManager<ElasticUser>, UserManager<ElasticUser>>();
-			services.TryAddScoped<SignInManager<ElasticUser>, SignInManager<ElasticUser>>();
+			//services.TryAddSingleton<IUserClaimsPrincipalFactory<ElasticUser>, UserClaimsPrincipalFactory<ElasticUser>>();
+			//services.TryAddSingleton<UserManager<ElasticUser>, UserManager<ElasticUser>>();
+			//services.TryAddScoped<SignInManager<ElasticUser>, SignInManager<ElasticUser>>();
 
 			services.AddMvc();
 
@@ -122,7 +137,8 @@ namespace Sample
 
 			app.UseStaticFiles();
 
-			app.UseIdentity();
+			//app.UseIdentity();
+			app.UseAuthentication();
 
 			// Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
 
@@ -164,9 +180,13 @@ namespace Sample
 
 				var userId = await UserManager.GetUserIdAsync(user);
 				var userName = await UserManager.GetUserNameAsync(user);
-				var id = new ClaimsIdentity(Options.Cookies.ApplicationCookieAuthenticationScheme,
-					Options.ClaimsIdentity.UserNameClaimType,
-					Options.ClaimsIdentity.RoleClaimType);
+
+				//var id = new ClaimsIdentity(Options.Cookies.ApplicationCookieAuthenticationScheme,
+				//	Options.ClaimsIdentity.UserNameClaimType,
+				//	Options.ClaimsIdentity.RoleClaimType);
+
+				var id = new ClaimsIdentity(IdentityConstants.ApplicationScheme);
+
 				id.AddClaim(new Claim(Options.ClaimsIdentity.UserIdClaimType, userId));
 				id.AddClaim(new Claim(Options.ClaimsIdentity.UserNameClaimType, userName));
 				if (UserManager.SupportsUserSecurityStamp)
